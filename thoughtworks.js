@@ -1,6 +1,6 @@
 (function() {
     angular
-        .module("ThoughtWorks", ["indexedDB"])
+        .module("ThoughtWorks", ["indexedDB", "luegg.directives"])
         .factory("ThoughtService", ThoughtService)
         .controller("OuterCtrl", OuterCtrl)
         .directive("addThought", addThought)
@@ -132,16 +132,14 @@
                         // Newest first
                         return b.writtenAt - a.writtenAt;
                     }).forEach(function(thought) {
-                        var group;
-
                         if(!grouped[thought.group]) {
                             grouped[thought.group] = {
                                 group: thought.group,
-                                thoughts: []
+                                thoughts: [thought]
                             };
+                        } else {
+                            grouped[thought.group].thoughts.push(thought);
                         }
-                        group = grouped[thought.group];
-                        group.thoughts.push(thought);
                     });
 
                     Object.keys(grouped).forEach(function(k) {
@@ -149,7 +147,6 @@
                             return a.writtenAt - b.writtenAt;
                         });
                     });
-
 
                     deferred.resolve(grouped);
                 })
@@ -314,9 +311,6 @@
             } else {
                 vm.notToday[thought.group].thoughts.push(thought);
             }
-
-            var objDiv = document.getElementById("thoughts");
-            objDiv.scrollTop = objDiv.scrollHeight;
         });
 
         // $scope.$on("thoughtDeleted", function(evt, thought) {
@@ -352,9 +346,6 @@
                 }
 
                 group.thoughts.push(thought);
-
-                var objDiv = document.getElementById("thoughts");
-                objDiv.scrollTop = objDiv.scrollHeight;
             });
 
             console.log(vm.notToday);

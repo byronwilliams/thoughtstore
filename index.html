@@ -11,6 +11,7 @@
     <script src="bower_components/angularjs/angular.min.js"></script>
     <script src="bower_components/angular-sanitize/angular-sanitize.min.js"></script>
     <script src="bower_components/angular-indexed-db/angular-indexed-db.min.js"></script>
+    <script src="bower_components/angular-scroll-glue/src/scrollglue.js"></script>
     <script src="bower_components/node-uuid/uuid.js"></script>
     <script src="thoughtworks.js"></script>
   </head>
@@ -32,7 +33,7 @@
           </nav>
         </div>
       </div>
-      <div id="thoughts" class="content pure-u-1 pure-u-md-3-4">
+      <div id="thoughts" class="content pure-u-1 pure-u-md-3-4" scroll-glue>
         <div>
           <div class="posts">
             <section class="post" ng-if="group.thoughts.length" ng-repeat="group in outer.notToday">
