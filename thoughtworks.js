@@ -86,7 +86,7 @@
                 var doc = {
                     id: uuid.v1(),
                     text: text,
-                    writtenAt: (new Date()).toJSON(),
+                    writtenAt: date.toJSON(),
                     createdAt: (new Date()).toJSON(),
                     updatedAt: (new Date()).toJSON(),
                 };
@@ -358,11 +358,7 @@
             templateUrl: "thoughts/add.html",
             controller: AddThoughtCtrl,
             controllerAs: "vm",
-            bindToController: true,
-            scope: {
-                group: "@",
-                showDate: "="
-            }
+            bindToController: true
         };
 
         return directive;
@@ -374,15 +370,20 @@
 
         vm.reset = function() {
             vm.text = "";
-            vm.date = null;
+
+            if(!vm.date || vm.date.length === 0) {
+                vm.date = (new Date());
+            }
         }
 
         vm.add = function() {
-            ThoughtService.add(vm.text, vm.group).then(function(thought) {
+            ThoughtService.add(vm.text, vm.date).then(function(thought) {
                 $scope.$emit("thoughtAdded", thought);
                 vm.reset();
             });
         }
+
+        vm.reset();
     }
 
     function oneThought() {

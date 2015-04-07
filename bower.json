@@ -22,6 +22,7 @@
     "angular-indexed-db": "~1.1.2",
     "node-uuid": "~1.4.3",
     "purecss": "~0.6.0",
-    "angular-scroll-glue": "~2.0.5"
+    "angular-scroll-glue": "~2.0.5",
+    "better-dateinput-polyfill": "~1.5.2"
   }
 }
