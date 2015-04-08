@@ -235,3 +235,7 @@ textarea, .thoughtbox {
 .add-area {
     margin-bottom:15px;
 }
+
+.add-date-input-container {
+    text-align: right;
+}
