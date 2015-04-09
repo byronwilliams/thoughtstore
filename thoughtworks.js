@@ -404,6 +404,10 @@
     OneThoughtCtrl.$inject = ["$scope", "ThoughtService"];
     function OneThoughtCtrl($scope, ThoughtService) {
         var vm = this;
+        var oneDayAgo = new Date();
+        oneDayAgo.setDate(oneDayAgo.getDate()-1);
+
+        vm.showTrash = vm.thought.writtenAt.getTime() > oneDayAgo;
 
         vm.remove = function() {
             $scope.$emit("deleteThought", vm.thought);
