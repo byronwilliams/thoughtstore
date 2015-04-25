@@ -1,0 +1,10 @@
+  <div>
+    <div class="posts">
+      <section class="post" ng-if="group.thoughts.length" ng-repeat="group in outer.notToday">
+        <header class="post-header">
+          <h1 class="content-subhead">{{group.group|date:"EEEE d MMMM"}}</h1>
+        </header>
+        <div data-one-thought thought="item" ng-repeat="item in group.thoughts">X</div>
+      </section>
+    </div>
+  </div>

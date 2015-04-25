@@ -42,8 +42,42 @@ h3 {
 }
 
 .sidebar {
-    background: rgb(61, 79, 93);
+    background: rgb(77,58,75);
     color: #fff;
+}
+
+.profile-img {
+    border-radius: 8px;
+}
+
+.current-user {
+    position: fixed;
+    bottom: 0;
+    height:55px;
+    background-color: rgb(60, 48, 58);
+    border-top:1px solid rgba(0,0,0,0.1);
+}
+
+.current-user-inner {
+   display: flex;
+   flex-direction: row;
+}
+
+.users-name, .profile-img {
+    line-height:55px;
+    height: 55px;
+}
+
+.users-name {
+    padding-left:20px;
+}
+
+.profile-img {
+    width: 55px;
+}
+
+.profile-img img {
+    padding:5px 0 0 5px;
 }
 
 .brand-title,
@@ -64,13 +98,10 @@ h3 {
     list-style: none;
 }
 .nav-item {
-    display: inline-block;
-    *display: inline;
-    zoom: 1;
+
 }
 .nav-item a {
     background: transparent;
-    border: 2px solid rgb(176, 202, 219);
     color: #fff;
     margin-top: 1em;
     letter-spacing: 0.05em;
@@ -79,8 +110,8 @@ h3 {
 }
 .nav-item a:hover,
 .nav-item a:focus {
-    border: 2px solid rgb(61, 146, 201);
-    text-decoration: none;
+/*    border: 2px solid rgb(61, 146, 201);
+*/    text-decoration: none;
 }
 
 .content-subhead {
@@ -239,8 +270,6 @@ textarea, .thoughtbox {
 .add-date-input-container {
     text-align: right;
 }
-
-
 
 
 

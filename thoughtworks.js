@@ -1,6 +1,6 @@
 (function() {
     angular
-        .module("ThoughtWorks", ["indexedDB", "luegg.directives"])
+        .module("ThoughtWorks", ["indexedDB", "luegg.directives", "ui.router"])
         .factory("ThoughtService", ThoughtService)
         .controller("OuterCtrl", OuterCtrl)
         .directive("addThought", addThought)
@@ -17,6 +17,29 @@
               .upgradeDatabase(3, function(event, db, tx) {
                 var objStore = db.createObjectStore('thoughts2', {keyPath: 'id'});
               });
+        }])
+        .config(["$stateProvider", "$urlRouterProvider", function($stateProvider, $urlRouterProvider) {
+            $urlRouterProvider.otherwise("/");
+            $stateProvider
+                .state('authenticate', {
+                    url: "/authenticate",
+                    views: {
+                        "primary": {
+                            templateUrl: "authenticate.html"
+                        }
+                    }
+                })
+                .state('list', {
+                    url: "/",
+                    views: {
+                        "primary": {
+                            templateUrl: "thoughts/list.html"
+                        },
+                        "secondary": {
+                            templateUrl: "thoughts/add.html"
+                        }
+                    }
+                })
         }])
         .filter("nl2br", ["$sce", "$filter", function($sce, $filter) {
          return function(data) {
@@ -125,6 +148,10 @@
             $indexedDB.openStore('thoughts2', function(store) {
                 store.getAll().then(function(ths) {
                     var grouped = {};
+
+                    var sevenDaysAgo = new Date();
+                    sevenDaysAgo.setDate(sevenDaysAgo.getDate()-7);
+
 
                     var thoughts = ths.filter(function(thought) {
                         return !thought.deleted;

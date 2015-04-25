@@ -13,42 +13,45 @@
     <script src="bower_components/angular-indexed-db/angular-indexed-db.min.js"></script>
     <script src="bower_components/angular-scroll-glue/src/scrollglue.js"></script>
     <script src="bower_components/node-uuid/uuid.js"></script>
+    <script src="bower_components/angular-ui-router/release/angular-ui-router.min.js"></script>
     <script src="thoughtworks.js"></script>
+    <script src="session.service.js"></script>
+    <script src="profile.controller.js"></script>
   </head>
   <body>
     <div id="layout" class="pure-g ng-cloak" data-ng-controller="OuterCtrl as outer">
       <div class="sidebar pure-u-1 pure-u-md-1-4">
         <div class="header">
-          <h1 class="brand-title">ThoughtStore</h1>
+          <h1 class="brand-title"><a ui-sref="list">ThoughtStore</a></h1>
           <h2 class="brand-tagline">Just write stuff</h2>
           <nav class="nav">
             <ul class="nav-list">
               <li class="nav-item">
-                <a class="pure-button" href="http://www.figroll.io">Figroll</a>
+                <a class="pure-button" href="http://www.figroll.io">#bees</a>
               </li>
               <li class="nav-item">
-                <a class="pure-button" href="http://www.112percent.com">112percent</a>
+                <a class="pure-button" href="http://www.112percent.com">#journal</a>
               </li>
             </ul>
           </nav>
         </div>
-      </div>
-      <div id="thoughts" class="content pure-u-1 pure-u-md-3-4" scroll-glue>
-        <div>
-          <div class="posts">
-            <section class="post" ng-if="group.thoughts.length" ng-repeat="group in outer.notToday">
-              <header class="post-header">
-                <h1 class="content-subhead">{{group.group|date:"EEEE d MMMM"}}</h1>
-              </header>
-              <div data-one-thought thought="item" ng-repeat="item in group.thoughts">X</div>
-            </section>
+        <div class="current-user pure-u-1 pure-u-md-1-4" ng-controller="ProfileCtrl as profile">
+          <div class="current-user-inner" data-ng-if="isLoggedIn">
+            <span class="profile-img">
+              <img height="45" width="45" ng-src="{{profile.user.gravatar}}" />
+            </span>
+            <span class="users-name">{{profile.user.fullName}}</span>
+          </div>
+          <div class="current-user-inner" data-ng-if="!isLoggedIn">
+            <a class="users-name" ui-sref="authenticate">Login / Sign Up</a>
           </div>
         </div>
       </div>
+      <div id="thoughts" class="content pure-u-1 pure-u-md-3-4" scroll-glue>
+        <div ui-view="primary"></div>
+      </div>
     </div>
-    <div class="new-thought pure-u-1 pure-u-md-3-4">
-      <div data-add-thought></div>
-    </div>
+    <div ui-view="secondary"></div>
   </div>
 </div>
 </body>
