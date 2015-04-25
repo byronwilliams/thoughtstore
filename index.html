@@ -17,6 +17,7 @@
     <script src="thoughtworks.js"></script>
     <script src="session.service.js"></script>
     <script src="profile.controller.js"></script>
+    <link href='http://fonts.googleapis.com/css?family=Libre+Baskerville:400,400italic,700' rel='stylesheet' type='text/css'>
   </head>
   <body>
     <div id="layout" class="pure-g ng-cloak" data-ng-controller="OuterCtrl as outer">
@@ -44,6 +45,7 @@
           </div>
           <div class="current-user-inner" data-ng-if="!isLoggedIn">
             <a class="users-name" ui-sref="authenticate">Login / Sign Up</a>
+            <a class="users-name" ui-sref="about">Find out more</a>
           </div>
         </div>
       </div>

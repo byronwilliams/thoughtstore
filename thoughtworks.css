@@ -305,3 +305,9 @@ content: "\e9ac";
 .icon-bin2:before {
 content: "\e9ad";
 }
+
+.about-page p, .about-page li {
+    font-family: "Libre Baskerville";
+    line-height: 1.6em;
+    color:#333;
+}

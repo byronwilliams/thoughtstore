@@ -29,6 +29,14 @@
                         }
                     }
                 })
+                .state('about', {
+                    url: "/about",
+                    views: {
+                        "primary": {
+                            templateUrl: "about.html"
+                        }
+                    }
+                })
                 .state('list', {
                     url: "/",
                     views: {

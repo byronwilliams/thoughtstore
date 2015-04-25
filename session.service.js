@@ -9,13 +9,28 @@
         var thoughts = [];
 
         var service = {
-            isLoggedIn: isLoggedIn
+            isLoggedIn: isLoggedIn,
+            login: login,
+            logout: logout,
+            signup: signup,
         }
 
         return service;
 
         function isLoggedIn() {
             return false;
+        }
+
+        function login(email, password) {
+
+        }
+
+        function logout() {
+
+        }
+
+        function signup(fullName, email, password) {
+
         }
     }
 })();
