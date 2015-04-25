@@ -1,14 +1,14 @@
 <h1>Login</h1>
-<form class="pure-form pure-form-aligned">
+<form class="pure-form pure-form-aligned" ng-submit="login(email, password)">
     <fieldset>
         <div class="pure-control-group">
             <label for="email">Email Address</label>
-            <input id="email" type="email" placeholder="Email Address">
+            <input ng-model="email" id="email" type="email" placeholder="Email Address">
         </div>
 
         <div class="pure-control-group">
             <label for="password">Password</label>
-            <input id="password" type="password" placeholder="Password">
+            <input ng-model="password" id="password" type="password" placeholder="Password">
         </div>
 
         <button type="submit" class="pure-button pure-button-primary">Login</button>
@@ -19,23 +19,23 @@
 <p>
     Accounts are free. Your Thoughts are <b>private</b> and will not be shared.
 </p>
-<form class="pure-form pure-form-aligned">
+<form class="pure-form pure-form-aligned" ng-submit="signup(fullName, email, password)">
     <fieldset>
         <div class="pure-control-group">
             <label for="name">Full Name</label>
-            <input id="name" type="text" placeholder="Full Name">
+            <input ng-model="fullName" id="name" type="text" placeholder="Full Name">
         </div>
 
         <div class="pure-control-group">
             <label for="email">Email Address</label>
-            <input id="email" type="email" placeholder="Email Address">
+            <input ng-model="email" id="email" type="email" placeholder="Email Address">
         </div>
 
         <div class="pure-control-group">
             <label for="password">Password</label>
-            <input id="password" type="password" placeholder="Password">
+            <input ng-model="password" id="password" type="password" placeholder="Password">
         </div>
 
-        <button class="pure-button-warning pure-button">Signup</button>
+        <button type="submit" class="pure-button pure-button-primary">Signup</button>
     </fieldset>
 </form>

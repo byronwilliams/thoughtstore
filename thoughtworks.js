@@ -5,6 +5,7 @@
         .controller("OuterCtrl", OuterCtrl)
         .directive("addThought", addThought)
         .directive("oneThought", oneThought)
+        .constant("API_URL", "http://localhost:7212")
         .config(["$indexedDBProvider", function($indexedDBProvider) {
             $indexedDBProvider
               .connection('thoughtworks')
@@ -25,7 +26,8 @@
                     url: "/authenticate",
                     views: {
                         "primary": {
-                            templateUrl: "authenticate.html"
+                            templateUrl: "authenticate.html",
+                            controller: "AuthenticateCtrl"
                         }
                     }
                 })
@@ -58,10 +60,13 @@
         .run(runBlock)
     ;
 
-    runBlock.$inject = ["ThoughtService", "$interval"];
-    function runBlock(ThoughtService, $interval) {
+    runBlock.$inject = ["$rootScope", "SessionService", "$interval"];
+    function runBlock($rootScope, SessionService, $interval) {
         // $interval(ThoughtService.sync, 5000);
-        ThoughtService.sync();
+        // ThoughtService.sync();
+        if(SessionService.isLoggedIn()) {
+            $rootScope.$broadcast("auth:loggedIn");
+        }
     }
 
     ThoughtService.$inject = ["$rootScope", "$http", "$q", "$indexedDB"];
