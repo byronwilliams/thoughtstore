@@ -6,6 +6,7 @@
       </header>
       <div data-one-thought thought="item" ng-repeat="item in group.thoughts">X</div>
     </section>
+    <p data-ng-if="!vm.hasPosts"><i>Enter your Thoughts below</i></p>
   </div>
   <div class="posts" ng-show="!outer.isLoggedIn">
     <h2>New Here?</h2>
