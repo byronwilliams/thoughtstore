@@ -122,6 +122,7 @@
 
         function asThought(thought) {
             thought.text = thought.text.trim();
+            console.log(thought.writtenAt)
             thought.writtenAt = new Date(thought.writtenAt);
             thought.createdAt = new Date(thought.createdAt);
             thought.updatedAt = new Date(thought.updatedAt);
@@ -132,64 +133,50 @@
         function add(text, date) {
             var deferred = $q.defer();
 
-            $indexedDB.openStore('thoughts2', function(store) {
-                if(!date) {
-                    date = new Date();
-                }
+            if(!date) {
+                date = new Date();
+            }
 
-                if(typeof(date) === "string") {
-                    var now = new Date();
-                    var then = new Date(date);
-                    then.setHours(now.getHours());
-                    then.setMinutes(now.getMinutes());
-                    then.setSeconds(now.getSeconds());
-                    then.setMilliseconds(now.getMilliseconds());
-                    date = then;
-                }
+            if(typeof(date) === "string") {
+                var now = new Date();
+                var then = new Date(date);
+                then.setHours(now.getHours());
+                then.setMinutes(now.getMinutes());
+                then.setSeconds(now.getSeconds());
+                then.setMilliseconds(now.getMilliseconds());
+                date = then;
+            }
 
-                var doc = {
-                    id: uuid.v1(),
-                    text: text,
-                    writtenAt: date.toJSON(),
-                    createdAt: (new Date()).toJSON(),
-                    updatedAt: (new Date()).toJSON(),
-                };
+            var doc = {
+                id: uuid.v1(),
+                text: text,
+                writtenAt: date.toJSON(),
+                createdAt: (new Date()).toJSON(),
+                updatedAt: (new Date()).toJSON(),
+            };
 
-                $http.post(API_URL + "/posts", doc).then(function(res) {
-                    var newdoc = res.data;
-                    store.insert(newdoc).then(function() {
-                        deferred.resolve(asThought(newdoc));
-                    }, function() {
-                        deferred.reject();
-                    });
-                }, function(err) {
-                    store.insert(doc).then(function(e) {
-                        console.log("inserted");
-                        deferred.resolve(asThought(doc));
-                    }, function() {
-                        deferred.reject();
-                    });
-                    console.log(err);
-                });
+            $http.post(API_URL + "/posts", doc).then(function(res) {
+                deferred.resolve(asThought(res.data));
+            }, function(err) {
+                deferred.reject();
             });
 
             return deferred.promise;
         }
 
         function remove(thought) {
-            var deferred = $q.defer();
 
-            $indexedDB.openStore('thoughts2', function(store) {
-                thought.deleted = true;
-                store.upsert(thought).then(function() {
-                    deferred.resolve();
-                }, function(err) {
-                    console.log(err);
-                    deferred.reject();
-                });
-            });
+            // $indexedDB.openStore('thoughts2', function(store) {
+            //     thought.deleted = true;
+            //     store.upsert(thought).then(function() {
+            //         deferred.resolve();
+            //     }, function(err) {
+            //         console.log(err);
+            //         deferred.reject();
+            //     });
+            // });
 
-            return deferred.promise;
+            return $http.delete(API_URL + "/posts/" + thought.id);
         }
 
         function list() {
@@ -200,9 +187,6 @@
             var grouped = {};
             raw.map(asThought).sort(function(a, b) {
                 // Newest first
-                if(b.writtenAt === a.writtenAt) {
-                    return b.text - a.text;
-                }
                 return b.writtenAt - a.writtenAt;
             }).forEach(function(thought) {
                 if(!grouped[thought.group]) {
@@ -419,31 +403,10 @@
             // });
         }
 
-        $rootScope.$on("thoughtAdded", function(evt, thought) {
-            console.log(thought)
-            if(!vm.notToday[thought.group]) {
-                vm.notToday[thought.group] = {
-                    group: thought.group,
-                    thoughts: [thought]
-                }
-            } else {
-                vm.notToday[thought.group].thoughts.push(thought);
-            }
-        });
-
         // $scope.$on("thoughtDeleted", function(evt, thought) {
         //     reloadToday();
         //     reloadOlder();
         // });
-
-        $scope.$on("deleteThought", function(evt, thought) {
-            evt.stopPropagation();
-
-            ThoughtService.remove(thought).then(function() {
-                var ths = vm.notToday[thought.group].thoughts;
-                ths.splice(ths.indexOf(thought), 1);
-            });
-        });
 
         $scope.$on("itemsSynched", function(evt, thoughts) {
             return;

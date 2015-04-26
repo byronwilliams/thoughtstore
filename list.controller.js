@@ -21,6 +21,27 @@
             });
         }
 
+        $rootScope.$on("thoughtAdded", function(evt, thought) {
+            if(!vm.posts[thought.group]) {
+                vm.posts[thought.group] = {
+                    group: thought.group,
+                    thoughts: [thought]
+                }
+            } else {
+                vm.posts[thought.group].thoughts.push(thought);
+            }
+        });
+
+        $scope.$on("deleteThought", function(evt, thought) {
+            console.log("deleteThought")
+            evt.stopPropagation();
+
+            ThoughtService.remove(thought).then(function() {
+                var ths = vm.posts[thought.group].thoughts;
+                ths.splice(ths.indexOf(thought), 1);
+            });
+        });
+
         $scope.$on("auth:loggedIn", function() {
             init();
         });
