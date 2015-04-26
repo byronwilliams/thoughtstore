@@ -9,6 +9,7 @@
         var thoughts = [];
 
         var service = {
+            init: init,
             isLoggedIn: isLoggedIn,
             login: login,
             logout: logout,
@@ -16,6 +17,12 @@
         }
 
         return service;
+
+        function init() {
+            if(isLoggedIn()) {
+                $rootScope.$broadcast("auth:loggedIn");
+            }
+        }
 
         function isLoggedIn() {
             return $window.sessionStorage.token && $window.sessionStorage.token.length > 0;
@@ -32,11 +39,14 @@
 
                 $state.go("list");
             }, function() {
-                delete $window.sessionStorage.token;
+                logout();
             });
         }
 
         function logout() {
+            delete $window.sessionStorage.token;
+            $rootScope.$broadcast("auth:loggedOut");
+            $state.go("about");
         }
 
         function signup(fullName, email, password) {

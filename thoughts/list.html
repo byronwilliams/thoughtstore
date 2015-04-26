@@ -1,10 +1,20 @@
-  <div>
-    <div class="posts">
-      <section class="post" ng-if="group.thoughts.length" ng-repeat="group in outer.notToday">
-        <header class="post-header">
-          <h1 class="content-subhead">{{group.group|date:"EEEE d MMMM"}}</h1>
-        </header>
-        <div data-one-thought thought="item" ng-repeat="item in group.thoughts">X</div>
-      </section>
-    </div>
+<div>
+  <div class="posts" ng-show="outer.isLoggedIn">
+    <section class="post" ng-if="group.thoughts.length" ng-repeat="group in vm.posts">
+      <header class="post-header">
+        <h1 class="content-subhead">{{group.group|date:"EEEE d MMMM"}}</h1>
+      </header>
+      <div data-one-thought thought="item" ng-repeat="item in group.thoughts">X</div>
+    </section>
   </div>
+  <div class="posts" ng-show="!outer.isLoggedIn">
+    <h2>New Here?</h2>
+    <p>
+      Start typing in the box below to add whatever you're thinking, or want to
+      note down.
+    </p>
+    <h2>Existing User</h2>
+    <p><i><a ui-sref="authenticate">Login</a> to see your previous thoughts.</i></p>
+  </div>
+</div>
+

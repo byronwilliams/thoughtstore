@@ -6,6 +6,10 @@
         .directive("addThought", addThought)
         .directive("oneThought", oneThought)
         .constant("API_URL", "http://localhost:7212")
+        .constant("AUTH", {
+            "loggedIn": 1,
+            "loggedOut": 2
+        })
         .config(["$indexedDBProvider", function($indexedDBProvider) {
             $indexedDBProvider
               .connection('thoughtworks')
@@ -27,7 +31,7 @@
                     views: {
                         "primary": {
                             templateUrl: "authenticate.html",
-                            controller: "AuthenticateCtrl"
+                            controller: "AuthenticateCtrl",
                         }
                     }
                 })
@@ -43,42 +47,66 @@
                     url: "/",
                     views: {
                         "primary": {
-                            templateUrl: "thoughts/list.html"
+                            templateUrl: "thoughts/list.html",
+                            controller: "ThoughtListCtrl",
+                            controllerAs: "vm"
                         },
                         "secondary": {
-                            templateUrl: "thoughts/add.html"
+                            templateUrl: "thoughts/add_outer.html"
                         }
                     }
                 })
         }])
         .filter("nl2br", ["$sce", "$filter", function($sce, $filter) {
-         return function(data) {
-           if (!data) return data;
-           return $sce.trustAsHtml(data.replace(/\n\r?/g, '<br />'));
-         };
+            return function(data) {
+                if (!data) {
+                    return data;
+                }
+                return $sce.trustAsHtml(data.replace(/\n\r?/g, '<br />'));
+            };
+        }])
+        .factory('authInterceptor', ["$rootScope", "$q", "$window", function ($rootScope, $q, $window) {
+          return {
+            request: function (config) {
+              config.headers = config.headers || {};
+              if ($window.sessionStorage.token) {
+                config.headers.Authorization = $window.sessionStorage.token;
+              }
+              return config;
+            },
+            response: function (response) {
+              if (response.status === 401) {
+                // handle the case where the user is not authenticated
+              }
+              return response || $q.when(response);
+            }
+          };
+        }])
+        .config(["$httpProvider", function ($httpProvider) {
+          $httpProvider.interceptors.push('authInterceptor');
         }])
         .run(runBlock)
     ;
 
-    runBlock.$inject = ["$rootScope", "SessionService", "$interval"];
-    function runBlock($rootScope, SessionService, $interval) {
+    runBlock.$inject = ["SessionService", "$interval"];
+    function runBlock(SessionService, $interval) {
         // $interval(ThoughtService.sync, 5000);
         // ThoughtService.sync();
-        if(SessionService.isLoggedIn()) {
-            $rootScope.$broadcast("auth:loggedIn");
-        }
+        SessionService.init();
     }
 
-    ThoughtService.$inject = ["$rootScope", "$http", "$q", "$indexedDB"];
-    function ThoughtService($rootScope, $http, $q, $indexedDB) {
+    ThoughtService.$inject = ["$rootScope", "$http", "$q", "$indexedDB", "API_URL"];
+    function ThoughtService($rootScope, $http, $q, $indexedDB, API_URL) {
         var showDays = 7;
         var thoughts = [];
 
         var service = {
             showDays: showDays,
+            list: list,
             add: add,
             remove: remove,
             filter: filter,
+            transform: transform,
             sync: sync,
             lastUpdated: lastUpdated,
             dateToGroup: dateToGroup
@@ -127,13 +155,22 @@
                     updatedAt: (new Date()).toJSON(),
                 };
 
-                store.insert(doc).then(function(e) {
-                    console.log("inserted")
-                    deferred.resolve(asThought(doc));
+                $http.post(API_URL + "/posts", doc).then(function(res) {
+                    var newdoc = res.data;
+                    store.insert(newdoc).then(function() {
+                        deferred.resolve(asThought(newdoc));
+                    }, function() {
+                        deferred.reject();
+                    });
                 }, function(err) {
+                    store.insert(doc).then(function(e) {
+                        console.log("inserted");
+                        deferred.resolve(asThought(doc));
+                    }, function() {
+                        deferred.reject();
+                    });
                     console.log(err);
-                    deferred.reject();
-                })
+                });
             });
 
             return deferred.promise;
@@ -153,6 +190,38 @@
             });
 
             return deferred.promise;
+        }
+
+        function list() {
+            return $http.get(API_URL + "/posts");
+        }
+
+        function transform(raw) {
+            var grouped = {};
+            raw.map(asThought).sort(function(a, b) {
+                // Newest first
+                if(b.writtenAt === a.writtenAt) {
+                    return b.text - a.text;
+                }
+                return b.writtenAt - a.writtenAt;
+            }).forEach(function(thought) {
+                if(!grouped[thought.group]) {
+                    grouped[thought.group] = {
+                        group: thought.group,
+                        thoughts: [thought]
+                    };
+                } else {
+                    grouped[thought.group].thoughts.push(thought);
+                }
+            });
+
+            Object.keys(grouped).forEach(function(k) {
+                grouped[k].thoughts = grouped[k].thoughts.sort(function(a, b) {
+                    return a.writtenAt - b.writtenAt;
+                });
+            });
+
+            return grouped;
         }
 
         function filter() {
@@ -320,19 +389,28 @@
         }
     }
 
-    OuterCtrl.$inject = ["$rootScope", "$scope", "ThoughtService"];
-    function OuterCtrl($rootScope, $scope, ThoughtService) {
+    OuterCtrl.$inject = ["$rootScope", "$scope", "ThoughtService", "SessionService"];
+    function OuterCtrl($rootScope, $scope, ThoughtService, SessionService) {
         var vm = this;
         vm.today = [];
         vm.notToday = {};
+        vm.isLoggedIn = SessionService.isLoggedIn();
 
-        reload();
+        $scope.$on("auth:loggedIn", function() {
+            vm.isLoggedIn = true;
+        });
 
-        function reload() {
-            ThoughtService.filter().then(function(thoughts) {
-                vm.notToday = thoughts;
-            });
-        }
+        $scope.$on("auth:loggedOut", function() {
+            vm.isLoggedIn = false;
+        });
+
+        // reload();
+
+        // function reload() {
+        //     ThoughtService.filter().then(function(thoughts) {
+        //         vm.notToday = thoughts;
+        //     });
+        // }
 
         vm.remove = function($index) {
             console.log($index);
@@ -417,7 +495,9 @@
         }
 
         vm.add = function() {
+            console.log("vm.add");
             ThoughtService.add(vm.text, vm.date).then(function(thought) {
+                console.log("abc")
                 $scope.$emit("thoughtAdded", thought);
                 vm.reset();
             });
