@@ -19,21 +19,21 @@
 <p>
     Accounts are free. Your Thoughts are <b>private</b> and will not be shared.
 </p>
-<form class="pure-form pure-form-aligned" ng-submit="signup(fullName, email, password)">
+<form class="pure-form pure-form-aligned" ng-submit="signup(rfullName, remail, rpassword)">
     <fieldset>
         <div class="pure-control-group">
             <label for="name">Full Name</label>
-            <input ng-model="fullName" id="name" type="text" placeholder="Full Name">
+            <input ng-model="rfullName" id="name" type="text" placeholder="Full Name">
         </div>
 
         <div class="pure-control-group">
             <label for="email">Email Address</label>
-            <input ng-model="email" id="email" type="email" placeholder="Email Address">
+            <input ng-model="remail" id="email" type="email" placeholder="Email Address">
         </div>
 
         <div class="pure-control-group">
             <label for="password">Password</label>
-            <input ng-model="password" id="password" type="password" placeholder="Password">
+            <input ng-model="rpassword" id="password" type="password" placeholder="Password">
         </div>
 
         <button type="submit" class="pure-button pure-button-primary">Signup</button>

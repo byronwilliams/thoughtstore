@@ -5,7 +5,8 @@
         .controller("OuterCtrl", OuterCtrl)
         .directive("addThought", addThought)
         .directive("oneThought", oneThought)
-        .constant("API_URL", "http://localhost:7212")
+        //.constant("API_URL", "http://localhost:7212")
+        .constant("API_URL", "http://thoughtstore.figroll.it:7212")
         .constant("AUTH", {
             "loggedIn": 1,
             "loggedOut": 2
