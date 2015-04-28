@@ -7,7 +7,7 @@
       <div data-one-thought thought="item" ng-repeat="item in group.thoughts">X</div>
     </section>
   </div>
-  <div class="import-required" ng-if="vm.loaded && vm.importRequired">
+  <div class="import-required" ng-if="vm.loaded && vm.hasUnsyncedPosts">
     <hr />
     <h2>Unimported Posts</h2>
     <div class="posts">
@@ -22,7 +22,7 @@
       </section>
     </div>
   </div>
-  <div class="posts" ng-show="vm.loaded && !vm.hasPosts">
+  <div class="posts" ng-show="vm.loaded && !(vm.hasUnsyncedPosts || vm.hasSyncedPosts)">
     <h2>New Here?</h2>
     <p>
       Start typing in the box below to add whatever you're thinking, or want to

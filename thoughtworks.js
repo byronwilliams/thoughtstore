@@ -157,11 +157,16 @@
 
         function add(text, date) {
 
+
             if(SessionService.isLoggedIn()) {
-                return addToDb(prepDoc(text, date));
+                return addToDb(prepDoc(text, date)).then(function(thought) {
+                    $rootScope.$broadcast("thoughtAdded", {thought: thought, isUnsynced: false});
+                });
             }
 
-            return addToIndexedDb(prepDoc(text, date));
+            return addToIndexedDb(prepDoc(text, date)).then(function(thought) {
+                $rootScope.$broadcast("thoughtAdded", {thought: thought, isUnsynced: true});
+            });
         }
 
         function addToDb(doc) {
@@ -504,8 +509,6 @@
         vm.add = function() {
             console.log("vm.add");
             ThoughtService.add(vm.text, vm.date).then(function(thought) {
-                console.log("abc")
-                $scope.$emit("thoughtAdded", thought);
                 vm.reset();
             });
         }

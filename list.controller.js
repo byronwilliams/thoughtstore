@@ -9,32 +9,32 @@
         vm.journal = "default";
         vm.syncedPosts = {};
         vm.unsyncedPosts = {};
-        vm.hasPosts = false;
+        vm.hasSyncedPosts = false;
+        vm.hasUnsyncedPosts = false;
         vm.loaded = false;
         vm.importRequired = true;
 
         init();
 
-        $scope.$watch("syncedPosts", function(before, after) {
-            vm.hasSyncedPosts = (Object.keys(after).length > 0);
-        });
-
-        $scope.$watch("unsyncedPosts", function(before, after) {
-            vm.hasUnsyncedPosts = (Object.keys(after).length > 0);
-        });
-
-
         function init() {
-            if(SessionService.isLoggedIn()) {
-                ThoughtService.list().then(function(posts) {
-                    vm.syncedPosts = posts;
-                    vm.loaded = true;
-                });
-            }
+            var listing = ThoughtService.listFromIndexedDb();
 
-            ThoughtService.listFromIndexedDb().then(function(posts) {
+            listing.then(function(posts) {
                 vm.unsyncedPosts = posts;
+                vm.hasUnsyncedPosts = (Object.keys(posts).length > 0);
             });
+
+            if(SessionService.isLoggedIn()) {
+                listing
+                    .then(ThoughtService.list)
+                    .then(function(posts) {
+                        vm.syncedPosts = posts;
+                        vm.hasSyncedPosts = (Object.keys(posts).length > 0);
+                        vm.loaded = true;
+                    });
+            } else {
+                vm.loaded = true;
+            }
         }
 
         vm.addTo = function(arr, thought) {
@@ -46,6 +46,8 @@
             } else {
                 arr[thought.group].thoughts.push(thought);
             }
+
+            return (Object.keys(arr).length > 0);
         }
 
         vm.removeFrom = function(arr, thought) {
@@ -55,10 +57,19 @@
             if(ths.length === 0) {
                 delete arr[thought.group];
             }
+
+            return (Object.keys(arr).length > 0);
         }
 
-        $rootScope.$on("thoughtAdded", function(evt, thought) {
-            vm.addTo(vm.syncedPosts, thought);
+        $rootScope.$on("thoughtAdded", function(evt, opts) {
+            var thought = opts.thought;
+            var isUnsynced = opts.isUnsynced;
+
+            if(isUnsynced) {
+                vm.hasUnsyncedPosts = vm.addTo(vm.unsyncedPosts, thought);
+            } else {
+                vm.hasSyncedPosts = vm.addTo(vm.syncedPosts, thought);
+            }
         });
 
         $scope.$on("deleteThought", function(evt, opts) {
@@ -69,9 +80,9 @@
 
             ThoughtService.remove(thought, isUnsynced).then(function() {
                 if(isUnsynced) {
-                    vm.removeFrom(vm.unsyncedPosts, thought);
+                    vm.hasUnsyncedPosts = vm.removeFrom(vm.unsyncedPosts, thought);
                 } else {
-                    vm.removeFrom(vm.syncedPosts, thought);
+                    vm.hasSyncedPosts = vm.removeFrom(vm.syncedPosts, thought);
                 }
             });
         });
@@ -80,8 +91,8 @@
             evt.stopPropagation();
 
             ThoughtService.doImport(thought).then(function(newThought) {
-                vm.addTo(vm.syncedPosts, newThought);
-                vm.removeFrom(vm.unsyncedPosts, thought);
+                vm.hasSyncedPosts = vm.addTo(vm.syncedPosts, newThought);
+                vm.hasUnsyncedPosts = vm.removeFrom(vm.unsyncedPosts, thought);
             });
         });
 
