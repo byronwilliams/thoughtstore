@@ -5,8 +5,9 @@
     </div>
   </div>
   <div class="pure-u-1-6 controls">
-    <p ng-if="vm.showTrash">
-      <a href="" ng-click="vm.remove()" class="icon icon-bin"></a>
+    <p ng-if="vm.showTrash || vm.importMode">
+      <a href="" ng-show="vm.importMode" ng-click="vm.import()" class="icon icon-upload"></a>
+      <a href="" ng-show="vm.showTrash" ng-click="vm.remove()" class="icon icon-bin"></a>
     </p>
   </div>
 </div>

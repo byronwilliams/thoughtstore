@@ -218,6 +218,10 @@ h3 {
     text-align: right;
 }
 
+.controls .icon {
+    padding:0 10px 0 5px;
+}
+
 textarea, .thoughtbox {
     line-height: 20px;
 
@@ -271,6 +275,9 @@ textarea, .thoughtbox {
     text-align: right;
 }
 
+.import-required {
+    background-color: rgb(255,255,224);
+}
 
 
 @font-face {
@@ -302,8 +309,8 @@ font-feature-settings: "liga";
 .icon-bin:before {
 content: "\e9ac";
 }
-.icon-bin2:before {
-content: "\e9ad";
+.icon-upload:before {
+content: "\e961";
 }
 
 .about-page p, .about-page li {

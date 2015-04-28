@@ -96,18 +96,19 @@
         SessionService.init();
     }
 
-    ThoughtService.$inject = ["$rootScope", "$http", "$q", "$indexedDB", "API_URL"];
-    function ThoughtService($rootScope, $http, $q, $indexedDB, API_URL) {
+    ThoughtService.$inject = ["$rootScope", "$http", "$q", "$indexedDB", "API_URL", "SessionService"];
+    function ThoughtService($rootScope, $http, $q, $indexedDB, API_URL, SessionService) {
         var showDays = 7;
         var thoughts = [];
 
         var service = {
             showDays: showDays,
             list: list,
+            listFromIndexedDb: listFromIndexedDb,
             add: add,
             remove: remove,
-            filter: filter,
             transform: transform,
+            doImport: doImport,
             sync: sync,
             lastUpdated: lastUpdated,
             dateToGroup: dateToGroup
@@ -123,7 +124,6 @@
 
         function asThought(thought) {
             thought.text = thought.text.trim();
-            console.log(thought.writtenAt)
             thought.writtenAt = new Date(thought.writtenAt);
             thought.createdAt = new Date(thought.createdAt);
             thought.updatedAt = new Date(thought.updatedAt);
@@ -131,9 +131,7 @@
             return thought;
         }
 
-        function add(text, date) {
-            var deferred = $q.defer();
-
+        function prepDoc(text, date) {
             if(!date) {
                 date = new Date();
             }
@@ -148,13 +146,26 @@
                 date = then;
             }
 
-            var doc = {
+            return {
                 id: uuid.v1(),
                 text: text,
                 writtenAt: date.toJSON(),
                 createdAt: (new Date()).toJSON(),
                 updatedAt: (new Date()).toJSON(),
             };
+        }
+
+        function add(text, date) {
+
+            if(SessionService.isLoggedIn()) {
+                return addToDb(prepDoc(text, date));
+            }
+
+            return addToIndexedDb(prepDoc(text, date));
+        }
+
+        function addToDb(doc) {
+            var deferred = $q.defer();
 
             $http.post(API_URL + "/posts", doc).then(function(res) {
                 deferred.resolve(asThought(res.data));
@@ -165,23 +176,83 @@
             return deferred.promise;
         }
 
-        function remove(thought) {
+        function addToIndexedDb(doc) {
+            var deferred = $q.defer();
 
-            // $indexedDB.openStore('thoughts2', function(store) {
-            //     thought.deleted = true;
-            //     store.upsert(thought).then(function() {
-            //         deferred.resolve();
-            //     }, function(err) {
-            //         console.log(err);
-            //         deferred.reject();
-            //     });
-            // });
+            $indexedDB.openStore('thoughts2', function(store) {
+                store.insert(doc).then(function() {
+                    deferred.resolve(asThought(doc));
+                }, function(err) {
+                    deferred.reject();
+                });
+            });
 
-            return $http.delete(API_URL + "/posts/" + thought.id);
+            return deferred.promise;
+        }
+
+        function remove(thought, isUnsynced) {
+            if(isUnsynced) {
+                return removeFromIndexedDb(thought);
+            } else {
+                return $http.delete(API_URL + "/posts/" + thought.id);
+            }
+        }
+
+        function removeFromIndexedDb(thought) {
+            var deferred = $q.defer();
+
+            $indexedDB.openStore('thoughts2', function(store) {
+                thought.deleted = true;
+                store.upsert(thought).then(function() {
+                    deferred.resolve();
+                }, function(err) {
+                    deferred.reject();
+                });
+            });
+
+            return deferred.promise;
         }
 
         function list() {
-            return $http.get(API_URL + "/posts");
+            if(SessionService.isLoggedIn()) {
+                return listFromAPI();
+            }
+
+            return listFromIndexedDb();
+        }
+
+        function listFromAPI() {
+            var deferred = $q.defer();
+
+            $http.get(API_URL + "/posts").then(function(res) {
+                deferred.resolve(transform(res.data));
+            }, function() {
+                deferred.reject();
+            });
+
+            return deferred.promise;
+        }
+
+        function listFromIndexedDb() {
+            var deferred = $q.defer();
+
+            $indexedDB.openStore('thoughts2', function(store) {
+                store.getAll().then(function(ths) {
+                    var grouped = {};
+
+                    var sevenDaysAgo = new Date();
+                    sevenDaysAgo.setDate(sevenDaysAgo.getDate()-7);
+
+
+                    var thoughts = ths.filter(function(thought) {
+                        return !thought.deleted;
+                    });
+
+                    deferred.resolve(transform(thoughts));
+                })
+            });
+
+            return deferred.promise;
         }
 
         function transform(raw) {
@@ -209,41 +280,13 @@
             return grouped;
         }
 
-        function filter() {
+        function doImport(thought) {
             var deferred = $q.defer();
 
-            $indexedDB.openStore('thoughts2', function(store) {
-                store.getAll().then(function(ths) {
-                    var grouped = {};
-
-                    var sevenDaysAgo = new Date();
-                    sevenDaysAgo.setDate(sevenDaysAgo.getDate()-7);
-
-
-                    var thoughts = ths.filter(function(thought) {
-                        return !thought.deleted;
-                    }).map(asThought).sort(function(a, b) {
-                        // Newest first
-                        return b.writtenAt - a.writtenAt;
-                    }).forEach(function(thought) {
-                        if(!grouped[thought.group]) {
-                            grouped[thought.group] = {
-                                group: thought.group,
-                                thoughts: [thought]
-                            };
-                        } else {
-                            grouped[thought.group].thoughts.push(thought);
-                        }
-                    });
-
-                    Object.keys(grouped).forEach(function(k) {
-                        grouped[k].thoughts = grouped[k].thoughts.sort(function(a, b) {
-                            return a.writtenAt - b.writtenAt;
-                        });
-                    });
-
-                    deferred.resolve(grouped);
-                })
+            addToDb(thought).then(function(newDoc) {
+                removeFromIndexedDb(thought).then(function() {
+                    deferred.resolve(newDoc);
+                });
             });
 
             return deferred.promise;
@@ -478,7 +521,8 @@
             controllerAs: "vm",
             bindToController: true,
             scope: {
-                thought: "="
+                thought: "=",
+                importMode: "="
             }
         };
 
@@ -491,10 +535,19 @@
         var oneDayAgo = new Date();
         oneDayAgo.setDate(oneDayAgo.getDate()-1);
 
-        vm.showTrash = vm.thought.writtenAt.getTime() > oneDayAgo;
+        if(vm.importMode || vm.thought.writtenAt.getTime() > oneDayAgo) {
+            vm.showTrash = true;
+        }
 
         vm.remove = function() {
-            $scope.$emit("deleteThought", vm.thought);
+            $scope.$emit("deleteThought", {
+                thought: vm.thought,
+                importMode: vm.importMode
+            });
+        }
+
+        vm.import = function() {
+            $scope.$emit("importThought", vm.thought);
         }
     }
 
