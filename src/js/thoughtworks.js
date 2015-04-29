@@ -1,6 +1,6 @@
 (function() {
     angular
-        .module("ThoughtWorks", ["indexedDB", "luegg.directives", "ui.router"])
+        .module("ThoughtWorks", ["twp", "indexedDB", "luegg.directives", "ui.router"])
         .factory("ThoughtService", ThoughtService)
         .controller("OuterCtrl", OuterCtrl)
         .directive("addThought", addThought)
@@ -31,7 +31,7 @@
                     url: "/authenticate",
                     views: {
                         "primary": {
-                            templateUrl: "authenticate.html",
+                            templateUrl: "/partials/authenticate.html",
                             controller: "AuthenticateCtrl",
                         }
                     }
@@ -40,7 +40,7 @@
                     url: "/about",
                     views: {
                         "primary": {
-                            templateUrl: "about.html"
+                            templateUrl: "/partials/about.html"
                         }
                     }
                 })
@@ -48,12 +48,12 @@
                     url: "/",
                     views: {
                         "primary": {
-                            templateUrl: "thoughts/list.html",
+                            templateUrl: "/partials/thoughts/list.html",
                             controller: "ThoughtListCtrl",
                             controllerAs: "vm"
                         },
                         "secondary": {
-                            templateUrl: "thoughts/add_outer.html"
+                            templateUrl: "/partials/thoughts/add_outer.html"
                         }
                     }
                 })
@@ -485,7 +485,7 @@
     function addThought() {
         var directive = {
             restrict: "A",
-            templateUrl: "thoughts/add.html",
+            templateUrl: "/partials/thoughts/add.html",
             controller: AddThoughtCtrl,
             controllerAs: "vm",
             bindToController: true
@@ -519,7 +519,7 @@
     function oneThought() {
         var directive = {
             restrict: "A",
-            templateUrl: "thoughts/one.html",
+            templateUrl: "/partials/thoughts/one.html",
             controller: OneThoughtCtrl,
             controllerAs: "vm",
             bindToController: true,
