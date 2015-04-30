@@ -6,12 +6,12 @@ var clean = require('gulp-clean');
 var order = require('gulp-order');
 var less = require('gulp-less');
 var minifyCSS = require('gulp-minify-css');
+var minifyhtml = require('gulp-minify-html');
 var ngHtml2Js = require("gulp-ng-html2js");
 
 gulp.task('clean', function() {
   return gulp.src("build/*", {read: false})
     .pipe(clean());
-    //.pipe(gulp.dest("build"));
 });
 
 gulp.task('buildAppJS', function() {
@@ -28,12 +28,17 @@ gulp.task('buildAppJS', function() {
 
 gulp.task('buildAppPartials', function() {
   return gulp.src("src/partials/**/*.html")
+    .pipe(minifyhtml({
+            empty: true,
+            cdata: true,
+            spare: true,
+    }))
     .pipe(ngHtml2Js({
         moduleName: "twp",
         prefix: "/partials/"
     }))
-    .pipe(concat("partials.min.js"))
-    //.pipe(uglify())
+    // .pipe(concat("partials.min.js"))
+    .pipe(uglify("partials.min.js"))
     .pipe(gulp.dest("build/js"));
 });
 
@@ -69,12 +74,24 @@ gulp.task('buildVendorCSS', function() {
 
 gulp.task('copyIndex', function() {
   return gulp.src("src/index.html")
+    // .pipe(minifyhtml({
+    //         empty: true,
+    //         cdata: true,
+    //         spare: true,
+    // }))
     .pipe(gulp.dest("build"));
 });
 
 gulp.task('copyFonts', function() {
   return gulp.src("src/fonts/*")
     .pipe(gulp.dest("build/fonts"));
+});
+
+gulp.task('watch', function() {
+    gulp.watch("src/less/*.less", ['buildAppCSS']);
+    gulp.watch("src/js/**/*.js", ['buildAppJS']);
+    gulp.watch("bower_components/**/*.js", ['buildVendorJS']);
+    gulp.watch("src/index.html", ['copyIndex']);
 });
 
 gulp.task("buildJS", ["buildAppJS", "buildVendorJS"]);
