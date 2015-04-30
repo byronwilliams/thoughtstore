@@ -8,13 +8,14 @@ var less = require('gulp-less');
 var minifyCSS = require('gulp-minify-css');
 var minifyhtml = require('gulp-minify-html');
 var ngHtml2Js = require("gulp-ng-html2js");
+var zip = require('gulp-zip');
 
 gulp.task('clean', function() {
   return gulp.src("build/*", {read: false})
     .pipe(clean());
 });
 
-gulp.task('buildAppJS', function() {
+gulp.task('buildAppJS', ["clean"], function() {
   return gulp.src("src/js/*.js")
     .pipe(order([
       "thoughtworks.js",
@@ -26,7 +27,7 @@ gulp.task('buildAppJS', function() {
     .pipe(gulp.dest("build/js"));
 });
 
-gulp.task('buildAppPartials', function() {
+gulp.task('buildAppPartials', ["clean"], function() {
   return gulp.src("src/partials/**/*.html")
     .pipe(minifyhtml({
             empty: true,
@@ -42,7 +43,7 @@ gulp.task('buildAppPartials', function() {
     .pipe(gulp.dest("build/js"));
 });
 
-gulp.task('buildVendorJS', function() {
+gulp.task('buildVendorJS', ["clean"], function() {
   return gulp.src([
       "bower_components/angularjs/angular.min.js",
       "bower_components/angular-sanitize/angular-sanitize.min.js",
@@ -55,7 +56,7 @@ gulp.task('buildVendorJS', function() {
     .pipe(gulp.dest("build/js"));
 });
 
-gulp.task('buildAppCSS', function() {
+gulp.task('buildAppCSS', ["clean"], function() {
   return gulp.src("src/less/*.less")
     .pipe(less())
     .pipe(minifyCSS())
@@ -63,7 +64,7 @@ gulp.task('buildAppCSS', function() {
     .pipe(gulp.dest("build/css"));
 });
 
-gulp.task('buildVendorCSS', function() {
+gulp.task('buildVendorCSS', ["clean"], function() {
   return gulp.src([
       "bower_components/purecss/build/pure-min.css",
       "bower_components/purecss/build/grids-responsive-min.css"
@@ -72,7 +73,7 @@ gulp.task('buildVendorCSS', function() {
     .pipe(gulp.dest("build/css"));
 });
 
-gulp.task('copyIndex', function() {
+gulp.task('copyIndex', ["clean"], function() {
   return gulp.src("src/index.html")
     // .pipe(minifyhtml({
     //         empty: true,
@@ -82,9 +83,15 @@ gulp.task('copyIndex', function() {
     .pipe(gulp.dest("build"));
 });
 
-gulp.task('copyFonts', function() {
+gulp.task('copyFonts', ["clean"], function() {
   return gulp.src("src/fonts/*")
     .pipe(gulp.dest("build/fonts"));
+});
+
+gulp.task('zip', function() {
+  return gulp.src('build/**/*', {base: "."})
+    .pipe(zip('public.zip'))
+    .pipe(gulp.dest('zip'));
 });
 
 gulp.task('watch', function() {
