@@ -3,14 +3,8 @@
         .module("ThoughtWorks", ["twp", "indexedDB", "luegg.directives", "ui.router"])
         .factory("ThoughtService", ThoughtService)
         .controller("OuterCtrl", OuterCtrl)
-        .directive("addThought", addThought)
-        .directive("oneThought", oneThought)
         //.constant("API_URL", "http://localhost:7212")
         .constant("API_URL", "http://thoughtstore.figroll.it:7212")
-        .constant("AUTH", {
-            "loggedIn": 1,
-            "loggedOut": 2
-        })
         .config(["$indexedDBProvider", function($indexedDBProvider) {
             $indexedDBProvider
               .connection('thoughtworks')
@@ -91,8 +85,6 @@
 
     runBlock.$inject = ["SessionService", "$interval"];
     function runBlock(SessionService, $interval) {
-        // $interval(ThoughtService.sync, 5000);
-        // ThoughtService.sync();
         SessionService.init();
     }
 
@@ -477,81 +469,6 @@
 
                 group.thoughts.push(thought);
             });
-
-            console.log(vm.notToday);
         });
     }
-
-    function addThought() {
-        var directive = {
-            restrict: "A",
-            templateUrl: "/partials/thoughts/add.html",
-            controller: AddThoughtCtrl,
-            controllerAs: "vm",
-            bindToController: true
-        };
-
-        return directive;
-    }
-
-    AddThoughtCtrl.$inject = ["$scope", "ThoughtService"];
-    function AddThoughtCtrl($scope, ThoughtService) {
-        var vm = this;
-
-        vm.reset = function() {
-            vm.text = "";
-
-            if(!vm.date || vm.date.length === 0) {
-                vm.date = (new Date());
-            }
-        }
-
-        vm.add = function() {
-            console.log("vm.add");
-            ThoughtService.add(vm.text, vm.date).then(function(thought) {
-                vm.reset();
-            });
-        }
-
-        vm.reset();
-    }
-
-    function oneThought() {
-        var directive = {
-            restrict: "A",
-            templateUrl: "/partials/thoughts/one.html",
-            controller: OneThoughtCtrl,
-            controllerAs: "vm",
-            bindToController: true,
-            scope: {
-                thought: "=",
-                importMode: "="
-            }
-        };
-
-        return directive;
-    }
-
-    OneThoughtCtrl.$inject = ["$scope", "ThoughtService"];
-    function OneThoughtCtrl($scope, ThoughtService) {
-        var vm = this;
-        var oneDayAgo = new Date();
-        oneDayAgo.setDate(oneDayAgo.getDate()-1);
-
-        if(vm.importMode || vm.thought.writtenAt.getTime() > oneDayAgo) {
-            vm.showTrash = true;
-        }
-
-        vm.remove = function() {
-            $scope.$emit("deleteThought", {
-                thought: vm.thought,
-                importMode: vm.importMode
-            });
-        }
-
-        vm.import = function() {
-            $scope.$emit("importThought", vm.thought);
-        }
-    }
-
 })();
