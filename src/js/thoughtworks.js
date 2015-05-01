@@ -30,14 +30,6 @@
                         }
                     }
                 })
-                .state('about', {
-                    url: "/about",
-                    views: {
-                        "primary": {
-                            templateUrl: "/partials/about.html"
-                        }
-                    }
-                })
                 .state('list', {
                     url: "/",
                     views: {

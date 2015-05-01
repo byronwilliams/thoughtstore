@@ -15,7 +15,7 @@ gulp.task('clean', function() {
     .pipe(clean());
 });
 
-gulp.task('buildAppJS', ["clean"], function() {
+gulp.task('buildAppJS', [/*"clean"*/], function() {
   return gulp.src("src/js/*.js")
     .pipe(order([
       "thoughtworks.js",
@@ -27,7 +27,7 @@ gulp.task('buildAppJS', ["clean"], function() {
     .pipe(gulp.dest("build/js"));
 });
 
-gulp.task('buildAppPartials', ["clean"], function() {
+gulp.task('buildAppPartials', [/*"clean"*/], function() {
   return gulp.src("src/partials/**/*.html")
     .pipe(minifyhtml({
             empty: true,
@@ -43,7 +43,7 @@ gulp.task('buildAppPartials', ["clean"], function() {
     .pipe(gulp.dest("build/js"));
 });
 
-gulp.task('buildVendorJS', ["clean"], function() {
+gulp.task('buildVendorJS', [/*"clean"*/], function() {
   return gulp.src([
       "bower_components/angularjs/angular.min.js",
       "bower_components/angular-sanitize/angular-sanitize.min.js",
@@ -56,7 +56,7 @@ gulp.task('buildVendorJS', ["clean"], function() {
     .pipe(gulp.dest("build/js"));
 });
 
-gulp.task('buildAppCSS', ["clean"], function() {
+gulp.task('buildAppCSS', [/*"clean"*/], function() {
   return gulp.src("src/less/*.less")
     .pipe(less())
     .pipe(minifyCSS())
@@ -64,7 +64,7 @@ gulp.task('buildAppCSS', ["clean"], function() {
     .pipe(gulp.dest("build/css"));
 });
 
-gulp.task('buildVendorCSS', ["clean"], function() {
+gulp.task('buildVendorCSS', [/*"clean"*/], function() {
   return gulp.src([
       "bower_components/purecss/build/pure-min.css",
       "bower_components/purecss/build/grids-responsive-min.css"
@@ -73,7 +73,7 @@ gulp.task('buildVendorCSS', ["clean"], function() {
     .pipe(gulp.dest("build/css"));
 });
 
-gulp.task('copyIndex', ["clean"], function() {
+gulp.task('copyIndex', [/*"clean"*/], function() {
   return gulp.src("src/index.html")
     // .pipe(minifyhtml({
     //         empty: true,
@@ -83,7 +83,7 @@ gulp.task('copyIndex', ["clean"], function() {
     .pipe(gulp.dest("build"));
 });
 
-gulp.task('copyFonts', ["clean"], function() {
+gulp.task('copyFonts', [/*"clean"*/], function() {
   return gulp.src("src/fonts/*")
     .pipe(gulp.dest("build/fonts"));
 });
@@ -97,6 +97,7 @@ gulp.task('zip', function() {
 gulp.task('watch', function() {
     gulp.watch("src/less/*.less", ['buildAppCSS']);
     gulp.watch("src/js/**/*.js", ['buildAppJS']);
+    gulp.watch("src/partials/**/*.html", ['buildAppPartials']);
     gulp.watch("bower_components/**/*.js", ['buildVendorJS']);
     gulp.watch("src/index.html", ['copyIndex']);
 });

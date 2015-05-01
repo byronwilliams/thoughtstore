@@ -22,14 +22,8 @@
       </section>
     </div>
   </div>
-  <div class="posts" ng-show="vm.loaded && !(vm.hasUnsyncedPosts || vm.hasSyncedPosts)">
-    <h2>New Here?</h2>
-    <p>
-      Start typing in the box below to add whatever you're thinking, or want to
-      note down.
-    </p>
-    <h2>Existing User</h2>
-    <p><i><a ui-sref="authenticate">Login</a> to see your previous thoughts.</i></p>
+  <div ng-include="'/partials/about.html'"
+       ng-show="vm.loaded && !(vm.hasUnsyncedPosts || vm.hasSyncedPosts)">
   </div>
 </div>
 
