@@ -1,54 +1,56 @@
-<h1>Login</h1>
-<form class="pure-form pure-form-aligned" ng-submit="vm.login(vm.email, vm.password)">
-    <fieldset>
-        <div class="pure-control-group">
-            <label for="email">Email Address</label>
-            <input required ng-model="vm.email" id="email" type="email" placeholder="Email Address">
-        </div>
+<div>
+    <h1>Login</h1>
+    <form class="pure-form pure-form-aligned" ng-submit="vm.login(vm.email, vm.password)">
+        <fieldset>
+            <div class="pure-control-group">
+                <label for="email">Email Address</label>
+                <input required ng-model="vm.email" id="email" type="email" placeholder="Email Address">
+            </div>
 
-        <div class="pure-control-group">
-            <label for="password">Password</label>
-            <input required ng-model="vm.password" id="password" type="password" placeholder="Password">
-        </div>
+            <div class="pure-control-group">
+                <label for="password">Password</label>
+                <input required ng-model="vm.password" id="password" type="password" placeholder="Password">
+            </div>
 
-        <div class="pure-g" ng-show="vm.loginError !== 200">
-            <aside class="pure-u-1-2" ng-switch on="vm.loginError">
-                <span ng-switch-when="400">Your email or password was not recognised</span>
-            </aside>
-        </div>
+            <div class="pure-g" ng-show="vm.loginError !== 200">
+                <aside class="pure-u-1-2" ng-switch on="vm.loginError">
+                    <span ng-switch-when="400">Your email or password was not recognised</span>
+                </aside>
+            </div>
 
-        <button type="submit" class="pure-button pure-button-primary">Login</button>
-    </fieldset>
-</form>
-<hr />
-<h1>Signup</h1>
-<p>
-    Accounts are free. Your Thoughts are <b>private</b> and will not be shared.
-</p>
-<form class="pure-form pure-form-aligned" ng-submit="vm.signup(vm.rfullName, vm.remail, vm.rpassword)">
-    <fieldset>
-        <div class="pure-control-group">
-            <label for="name">Full Name</label>
-            <input required ng-model="vm.rfullName" id="name" type="text" placeholder="Full Name">
-        </div>
+            <button type="submit" class="pure-button pure-button-primary">Login</button>
+        </fieldset>
+    </form>
+    <hr />
+    <h1>Signup</h1>
+    <p>
+        Accounts are free. Your Thoughts are <b>private</b> and will not be shared.
+    </p>
+    <form class="pure-form pure-form-aligned" ng-submit="vm.signup(vm.rfullName, vm.remail, vm.rpassword)">
+        <fieldset>
+            <div class="pure-control-group">
+                <label for="name">Full Name</label>
+                <input required ng-model="vm.rfullName" id="name" type="text" placeholder="Full Name">
+            </div>
 
-        <div class="pure-control-group">
-            <label for="email">Email Address</label>
-            <input required ng-model="vm.remail" id="email" type="email" placeholder="Email Address">
-        </div>
+            <div class="pure-control-group">
+                <label for="email">Email Address</label>
+                <input required ng-model="vm.remail" id="email" type="email" placeholder="Email Address">
+            </div>
 
-        <div class="pure-control-group">
-            <label for="password">Password</label>
-            <input required ng-model="vm.rpassword" id="password" type="password" placeholder="Password">
-        </div>
+            <div class="pure-control-group">
+                <label for="password">Password</label>
+                <input required ng-model="vm.rpassword" id="password" type="password" placeholder="Password">
+            </div>
 
-        <div class="pure-g" ng-show="vm.registerError !== 200">
-            <aside class="pure-u-1-2" ng-switch on="vm.registerError">
-                <span ng-switch-when="400">Please ensure you have a valid email address, your password is 8 characters long and you've given your name.</span>
-                <span ng-switch-when="409">This email address is already taken</span>
-            </aside>
-        </div>
+            <div class="pure-g" ng-show="vm.registerError !== 200">
+                <aside class="pure-u-1-2" ng-switch on="vm.registerError">
+                    <span ng-switch-when="400">Please ensure you have a valid email address, your password is 8 characters long and you've given your name.</span>
+                    <span ng-switch-when="409">This email address is already taken</span>
+                </aside>
+            </div>
 
-        <button type="submit" class="pure-button pure-button-primary">Signup</button>
-    </fieldset>
-</form>
+            <button type="submit" class="pure-button pure-button-primary">Signup</button>
+        </fieldset>
+    </form>
+</div>

@@ -4,6 +4,10 @@
     box-sizing: border-box;
 }
 
+html, body {
+    height: 100%;
+}
+
 body {
     overflow: hidden;
 }
@@ -33,6 +37,7 @@ h3 {
 
 #layout {
     padding: 0;
+    height: 100%;
 }
 
 .header {
@@ -126,6 +131,8 @@ h3 {
 
 .content {
     padding: 2em 1em 0;
+    height: 100%;
+    overflow: scroll;
 }
 
 .post {
@@ -249,7 +256,7 @@ textarea, .thoughtbox {
     padding: 8px 10px;
 }
 
-.content {
+.content-scrollable {
     overflow-y: auto;
     height: 540px;
 }
