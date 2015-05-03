@@ -5,19 +5,24 @@
 
     AuthenticateCtrl.$inject = ["$rootScope", "$scope", "SessionService"];
     function AuthenticateCtrl($rootScope, $scope, SessionService) {
-        $scope.login = function(email, password) {
+        var vm = this;
+        vm.loginError = 200;
+        vm.registerError = 200;
+
+        vm.login = function(email, password) {
             SessionService.login(email, password).then(function() {
-
-            }, function() {
-
+                vm.loginError = 200;
+            }, function(res) {
+                vm.loginError = res.status;
             });
         }
 
-        $scope.signup = function(fullName, email, password) {
+        vm.signup = function(fullName, email, password) {
             SessionService.signup(fullName, email, password).then(function() {
-
-            }, function() {
-
+                vm.registerError = 200;
+            }, function(res) {
+                console.log(res);
+                vm.registerError = res.status;
             });
         }
     };

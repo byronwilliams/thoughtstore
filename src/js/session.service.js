@@ -29,10 +29,12 @@
         }
 
         function login(email, password) {
-            return $http.post(API_URL + "/login", {
+            var x = $http.post(API_URL + "/login", {
                 "email": email,
                 "password": password
-            }).then(function(res) {
+            });
+
+            x.then(function(res) {
                 $window.sessionStorage.token = res.data.id;
 
                 $rootScope.$broadcast("auth:loggedIn");
@@ -41,16 +43,16 @@
             }, function() {
                 logout();
             });
+
+            return x;
         }
 
         function logout() {
             delete $window.sessionStorage.token;
             $rootScope.$broadcast("auth:loggedOut");
-            $state.go("about");
         }
 
         function signup(fullName, email, password) {
-            console.log(fullName, email, password);
             return $http.post(API_URL + "/users", {
                 "fullName": fullName,
                 "email": email,

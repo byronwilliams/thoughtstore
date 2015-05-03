@@ -27,6 +27,7 @@
                         "primary": {
                             templateUrl: "/partials/authenticate.html",
                             controller: "AuthenticateCtrl",
+                            controllerAs: "vm"
                         }
                     }
                 })
