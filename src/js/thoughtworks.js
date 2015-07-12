@@ -3,7 +3,8 @@
         .module("ThoughtWorks", ["twp", "luegg.directives", "ui.router"])
         .factory("ThoughtService", ThoughtService)
         .controller("OuterCtrl", OuterCtrl)
-        .constant("API_URL", "http://thoughtstore.figroll.it:7212")
+        .controller("AddOuterCtrl", AddOuterCtrl)
+        .constant("API_URL", "http://jrnl.today:7212")
         .config(["$stateProvider", "$urlRouterProvider", function($stateProvider, $urlRouterProvider) {
             $urlRouterProvider.otherwise("/");
             $stateProvider
@@ -225,6 +226,21 @@
         function lastUpdated() {
             return localStorage.getItem("cursor");
         }
+    }
+
+    AddOuterCtrl.$inject = ["$rootScope", "$scope", "ThoughtService", "SessionService"];
+    function AddOuterCtrl($rootScope, $scope, ThoughtService, SessionService) {
+        var vm = this;
+        vm.isLoggedIn = SessionService.isLoggedIn();
+
+        $scope.$on("auth:loggedIn", function() {
+            vm.isLoggedIn = true;
+            console.log(vm.isLoggedIn);
+        });
+
+        $scope.$on("auth:loggedOut", function() {
+            vm.isLoggedIn = false;
+        });
     }
 
     OuterCtrl.$inject = ["$rootScope", "$scope", "ThoughtService", "SessionService"];

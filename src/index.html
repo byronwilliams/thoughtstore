@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Keep your Diary or Journal on the Thoughtstore.">
-    <title>ThoughtStore Daily Diary/Journal</title>
+    <title>JRNL Diary/Journal</title>
     <link rel="stylesheet" href="css/vendor.min.css" type="text/css" />
     <link rel="stylesheet" href="css/app.min.css" type="text/css" />
     <script src="js/vendor.min.js"></script>
@@ -16,15 +16,17 @@
     <div id="layout" class="pure-g ng-cloak" data-ng-controller="OuterCtrl as outer">
       <div class="sidebar pure-u-1 pure-u-md-1-4">
         <div class="header">
-          <h1 class="brand-title"><a ui-sref="list">ThoughtStore</a></h1>
+          <h1 class="brand-title"><a ui-sref="list">JRNL</a></h1>
           <h2 class="brand-tagline">Just write stuff</h2>
         </div>
         <div class="current-user pure-u-1 pure-u-md-1-4" ng-controller="ProfileCtrl as profile">
           <div class="current-user-inner" data-ng-if="outer.isLoggedIn">
+            <!--
             <span class="profile-img">
               <img height="45" width="45" ng-src="{{profile.user.gravatar}}" />
             </span>
             <span class="users-name">{{profile.user.fullName}}</span>
+            -->
             <a class="users-name" href="" ng-click="profile.logout()">Logout</a>
           </div>
           <div class="current-user-inner" data-ng-if="!outer.isLoggedIn">

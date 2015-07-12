@@ -7,21 +7,18 @@
     function ThoughtListCtrl($rootScope, $scope, ThoughtService, SessionService) {
         var vm = this;
         vm.journal = "default";
-        vm.syncedPosts = {};
-        vm.unsyncedPosts = {};
-        vm.hasSyncedPosts = false;
-        vm.hasUnsyncedPosts = false;
-        vm.loaded = false;
-        vm.importRequired = true;
+        vm.posts = {};
+        vm.loggedIn = false;
 
         init();
 
         function init() {
             if(SessionService.isLoggedIn()) {
+                vm.loggedIn = true;
+
                 ThoughtService.list()
                     .then(function(posts) {
-                        vm.syncedPosts = posts;
-                        vm.hasSyncedPosts = (Object.keys(posts).length > 0);
+                        vm.posts = posts;
                         vm.loaded = true;
                     });
             }
@@ -53,36 +50,17 @@
 
         $rootScope.$on("thoughtAdded", function(evt, opts) {
             var thought = opts.thought;
-            var isUnsynced = opts.isUnsynced;
 
-            if(isUnsynced) {
-                vm.hasUnsyncedPosts = vm.addTo(vm.unsyncedPosts, thought);
-            } else {
-                vm.hasSyncedPosts = vm.addTo(vm.syncedPosts, thought);
-            }
+            vm.addTo(vm.posts, thought);
         });
 
         $scope.$on("deleteThought", function(evt, opts) {
             evt.stopPropagation();
 
             var thought = opts.thought;
-            var isUnsynced = opts.importMode || false;
 
-            ThoughtService.remove(thought, isUnsynced).then(function() {
-                if(isUnsynced) {
-                    vm.hasUnsyncedPosts = vm.removeFrom(vm.unsyncedPosts, thought);
-                } else {
-                    vm.hasSyncedPosts = vm.removeFrom(vm.syncedPosts, thought);
-                }
-            });
-        });
-
-        $scope.$on("importThought", function(evt, thought) {
-            evt.stopPropagation();
-
-            ThoughtService.doImport(thought).then(function(newThought) {
-                vm.hasSyncedPosts = vm.addTo(vm.syncedPosts, newThought);
-                vm.hasUnsyncedPosts = vm.removeFrom(vm.unsyncedPosts, thought);
+            ThoughtService.remove(thought, vm.posts).then(function() {
+                vm.removeFrom(vm.posts, thought);
             });
         });
 
@@ -91,7 +69,8 @@
         });
 
         $scope.$on("auth:loggedOut", function() {
-            $scope.syncedPosts = {};
+            vm.posts = {};
+            vm.loggedIn = false;
         });
     };
 })();

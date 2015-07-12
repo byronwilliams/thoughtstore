@@ -29,7 +29,6 @@
         }
 
         vm.add = function() {
-            console.log("vm.add");
             ThoughtService.add(vm.text, vm.date).then(function(thought) {
                 vm.reset();
             });
