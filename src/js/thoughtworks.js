@@ -1,23 +1,9 @@
 (function() {
     angular
-        .module("ThoughtWorks", ["twp", "indexedDB", "luegg.directives", "ui.router"])
+        .module("ThoughtWorks", ["twp", "luegg.directives", "ui.router"])
         .factory("ThoughtService", ThoughtService)
         .controller("OuterCtrl", OuterCtrl)
-        //.constant("API_URL", "http://localhost:7212")
         .constant("API_URL", "http://thoughtstore.figroll.it:7212")
-        .config(["$indexedDBProvider", function($indexedDBProvider) {
-            $indexedDBProvider
-              .connection('thoughtworks')
-              .upgradeDatabase(1, function(event, db, tx) {
-                var objStore = db.createObjectStore('thoughts', {keyPath: 'timestamp'});
-              })
-              .upgradeDatabase(2, function(event, db, tx) {
-                tx.objectStore("thoughts").createIndex("id", "id", { unique: true });
-              })
-              .upgradeDatabase(3, function(event, db, tx) {
-                var objStore = db.createObjectStore('thoughts2', {keyPath: 'id'});
-              });
-        }])
         .config(["$stateProvider", "$urlRouterProvider", function($stateProvider, $urlRouterProvider) {
             $urlRouterProvider.otherwise("/");
             $stateProvider
@@ -81,20 +67,17 @@
         SessionService.init();
     }
 
-    ThoughtService.$inject = ["$rootScope", "$http", "$q", "$indexedDB", "API_URL", "SessionService"];
-    function ThoughtService($rootScope, $http, $q, $indexedDB, API_URL, SessionService) {
+    ThoughtService.$inject = ["$rootScope", "$http", "$q", "API_URL", "SessionService"];
+    function ThoughtService($rootScope, $http, $q, API_URL, SessionService) {
         var showDays = 7;
         var thoughts = [];
 
         var service = {
             showDays: showDays,
             list: list,
-            listFromIndexedDb: listFromIndexedDb,
             add: add,
             remove: remove,
             transform: transform,
-            doImport: doImport,
-            sync: sync,
             lastUpdated: lastUpdated,
             dateToGroup: dateToGroup
         }
@@ -132,7 +115,6 @@
             }
 
             return {
-                id: uuid.v1(),
                 text: text,
                 writtenAt: date.toJSON(),
                 createdAt: (new Date()).toJSON(),
@@ -141,8 +123,6 @@
         }
 
         function add(text, date) {
-
-
             if(SessionService.isLoggedIn()) {
                 return addToDb(prepDoc(text, date)).then(function(thought) {
                     $rootScope.$broadcast("thoughtAdded", {thought: thought, isUnsynced: false});
@@ -166,49 +146,14 @@
             return deferred.promise;
         }
 
-        function addToIndexedDb(doc) {
-            var deferred = $q.defer();
-
-            $indexedDB.openStore('thoughts2', function(store) {
-                store.insert(doc).then(function() {
-                    deferred.resolve(asThought(doc));
-                }, function(err) {
-                    deferred.reject();
-                });
-            });
-
-            return deferred.promise;
-        }
 
         function remove(thought, isUnsynced) {
-            if(isUnsynced) {
-                return removeFromIndexedDb(thought);
-            } else {
-                return $http.delete(API_URL + "/posts/" + thought.id);
-            }
+            return $http.delete(API_URL + "/posts/" + thought.id);
         }
 
-        function removeFromIndexedDb(thought) {
-            var deferred = $q.defer();
-
-            $indexedDB.openStore('thoughts2', function(store) {
-                thought.deleted = true;
-                store.upsert(thought).then(function() {
-                    deferred.resolve();
-                }, function(err) {
-                    deferred.reject();
-                });
-            });
-
-            return deferred.promise;
-        }
 
         function list() {
-            if(SessionService.isLoggedIn()) {
-                return listFromAPI();
-            }
-
-            return listFromIndexedDb();
+            return listFromAPI();
         }
 
         function listFromAPI() {
@@ -223,27 +168,6 @@
             return deferred.promise;
         }
 
-        function listFromIndexedDb() {
-            var deferred = $q.defer();
-
-            $indexedDB.openStore('thoughts2', function(store) {
-                store.getAll().then(function(ths) {
-                    var grouped = {};
-
-                    var sevenDaysAgo = new Date();
-                    sevenDaysAgo.setDate(sevenDaysAgo.getDate()-7);
-
-
-                    var thoughts = ths.filter(function(thought) {
-                        return !thought.deleted;
-                    });
-
-                    deferred.resolve(transform(thoughts));
-                })
-            });
-
-            return deferred.promise;
-        }
 
         function transform(raw) {
             var grouped = {};
@@ -292,113 +216,9 @@
 
             $http.get("http://localhost:7212?since=" + lastSync).then(function(res) {
                 var thoughts = res.data.map(asThought);
-                allWritten = thoughts.map(function(thought) {
-                    var isWritten = $q.defer();
-
-                    $indexedDB.openStore('thoughts2', function(store) {
-                        store.find(thought.id).then(function(){
-                            isWritten.resolve(thought);
-                        }).catch(function() {
-                            store.insert(thought).then(function() {
-                                isWritten.resolve(thought);
-                            }, function(err) {
-                                isWritten.reject();
-                            });
-                        })
-                    });
-
-                    return isWritten.promise;
-                });
-
                 gotData.resolve();
             }, function(err) {
                 console.log(err);
-            });
-
-            gotData.promise.then(function() {
-                $indexedDB.openStore('thoughts2', function(store) {
-                    store.getAll().then(function(ths) {
-                        ths.filter(function(thought) {
-                            return !thought.persisted && !thought.deleted;
-                        }).forEach(function(thought) {
-                            $http.post("http://localhost:7212", [thought]).then(function(res) {
-                                if(thought.id !== res.data[0].id) {
-                                    console.log("id has changed", thought.id, res.data[0].id);
-                                    remove(thought).then(function() {
-                                        $indexedDB.openStore('thoughts2', function(store) {
-                                            console.log(thought);
-                                            console.log(res.data[0])
-                                            store.insert(res.data[0]).then(function() {
-
-                                            });
-
-                                        });
-
-                                    })
-
-                                }
-                            });
-                        })
-                    });
-                });
-            });
-
-            // Delete deleted items
-            gotData.promise.then(function() {
-                $indexedDB.openStore('thoughts2', function(store) {
-                    store.getAll().then(function(ths) {
-                        ths.filter(function(thought) {
-                            return thought.deleted;
-                        }).forEach(function(thought) {
-                            $http.delete("http://localhost:7212/" + thought.id).then(function(res) {
-                                $indexedDB.openStore('thoughts2', function(store) {
-                                    store.delete(thought.id);
-                                });
-                            }, function() {
-                                $indexedDB.openStore('thoughts2', function(store) {
-                                    store.delete(thought.id);
-                                });
-                            });
-                        });
-                    });
-                });
-            });
-
-            $q.all([gotData.promise, sendData.promise]).then(function() {
-                $q.all(allWritten).then(function(thoughts) {
-                    $rootScope.$broadcast("itemsSynched", thoughts);
-                    localStorage.setItem("lastSync", (new Date()).toJSON());
-                });
-            });
-        }
-
-        function fullSync() {
-            return;
-            // one way sync at the moment
-            $indexedDB.openStore('thoughts2', function(store) {
-                store.clear();
-            }).then(function() {
-                $indexedDB.openStore('thoughts', function(store) {
-                    store.getAll().then(function(ths) {
-                        ths.forEach(function(thought) {
-                            $http.post("http://localhost:7212", [thought]).then(function(res) {
-                                $indexedDB.openStore('thoughts2', function(store) {
-                                    store.insert(res.data[0]).then(function() {
-                                        console.log("added")
-                                        // store.delete(thought.timestamp.toJSON()).then(function() {
-                                        //     console.log("success");
-                                        // })
-                                    }, function(err) {
-                                        console.log("err", err);
-                                    });
-                                });
-                            }, function() {
-                                console.log("HTTP failed")
-                            })
-
-                        })
-                    });
-                });
             });
         }
 

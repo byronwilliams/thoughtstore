@@ -17,23 +17,13 @@
         init();
 
         function init() {
-            var listing = ThoughtService.listFromIndexedDb();
-
-            listing.then(function(posts) {
-                vm.unsyncedPosts = posts;
-                vm.hasUnsyncedPosts = (Object.keys(posts).length > 0);
-            });
-
             if(SessionService.isLoggedIn()) {
-                listing
-                    .then(ThoughtService.list)
+                ThoughtService.list()
                     .then(function(posts) {
                         vm.syncedPosts = posts;
                         vm.hasSyncedPosts = (Object.keys(posts).length > 0);
                         vm.loaded = true;
                     });
-            } else {
-                vm.loaded = true;
             }
         }
 

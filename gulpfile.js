@@ -1,14 +1,16 @@
-var gulp = require('gulp');
-var rename = require('gulp-rename');
-var uglify = require('gulp-uglifyjs');
-var concat = require('gulp-concat');
-var clean = require('gulp-clean');
-var order = require('gulp-order');
-var less = require('gulp-less');
-var minifyCSS = require('gulp-minify-css');
-var minifyhtml = require('gulp-minify-html');
-var ngHtml2Js = require("gulp-ng-html2js");
-var zip = require('gulp-zip');
+var gulp = require('gulp'),
+    rename = require('gulp-rename'),
+    uglify = require('gulp-uglify'),
+    sourcemaps = require('gulp-sourcemaps'),
+    concat = require('gulp-concat'),
+    clean = require('gulp-clean'),
+    order = require('gulp-order'),
+    less = require('gulp-less'),
+    minifyCSS = require('gulp-minify-css'),
+    minifyhtml = require('gulp-minify-html'),
+    ngHtml2Js = require("gulp-ng-html2js"),
+    zip = require('gulp-zip')
+    serve = require('gulp-serve');
 
 gulp.task('clean', function() {
   return gulp.src("build/*", {read: false})
@@ -21,9 +23,9 @@ gulp.task('buildAppJS', [/*"clean"*/], function() {
       "thoughtworks.js",
       "*.js"
     ]))
-    .pipe(uglify("app.min.js", {
-      outSourceMap: true
-    }))
+    .pipe(sourcemaps.init())
+      .pipe(concat("app.min.js"))
+    .pipe(sourcemaps.write())
     .pipe(gulp.dest("build/js"));
 });
 
@@ -38,19 +40,20 @@ gulp.task('buildAppPartials', [/*"clean"*/], function() {
         moduleName: "twp",
         prefix: "/partials/"
     }))
-    // .pipe(concat("partials.min.js"))
-    .pipe(uglify("partials.min.js"))
+    .pipe(sourcemaps.init())
+      .pipe(concat("partials.min.js"))
+    .pipe(sourcemaps.write())
     .pipe(gulp.dest("build/js"));
 });
 
 gulp.task('buildVendorJS', [/*"clean"*/], function() {
   return gulp.src([
-      "bower_components/angularjs/angular.min.js",
-      "bower_components/angular-sanitize/angular-sanitize.min.js",
-      "bower_components/angular-indexed-db/angular-indexed-db.min.js",
-      "bower_components/angular-scroll-glue/src/scrollglue.js",
-      "bower_components/angular-ui-router/release/angular-ui-router.min.js",
-      "bower_components/node-uuid/uuid.js",
+      "node_modules/angular/angular.js",
+      "node_modules/angular-sanitize/angular-sanitize.min.js",
+      //"node_modules/angular-indexed-db/angular-indexed-db.min.js",
+      "node_modules/angularjs-scroll-glue/src/scrollglue.js",
+      "node_modules/angular-ui-router/release/angular-ui-router.min.js",
+      // "node_modules/node-uuid/uuid.js",
     ])
     .pipe(concat("vendor.min.js"))
     .pipe(gulp.dest("build/js"));
@@ -66,8 +69,8 @@ gulp.task('buildAppCSS', [/*"clean"*/], function() {
 
 gulp.task('buildVendorCSS', [/*"clean"*/], function() {
   return gulp.src([
-      "bower_components/purecss/build/pure-min.css",
-      "bower_components/purecss/build/grids-responsive-min.css"
+      "node_modules/purecss/build/pure-min.css",
+      "node_modules/purecss/build/grids-responsive-min.css"
     ])
     .pipe(concat("vendor.min.css"))
     .pipe(gulp.dest("build/css"));
@@ -93,6 +96,8 @@ gulp.task('zip', function() {
     .pipe(zip('public.zip'))
     .pipe(gulp.dest('zip'));
 });
+
+gulp.task('serve', serve('build'));
 
 gulp.task('watch', function() {
     gulp.watch("src/less/*.less", ['buildAppCSS']);
