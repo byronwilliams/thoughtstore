@@ -4,7 +4,8 @@
         .factory("ThoughtService", ThoughtService)
         .controller("OuterCtrl", OuterCtrl)
         .controller("AddOuterCtrl", AddOuterCtrl)
-        .constant("API_URL", "http://jrnl.today:7212")
+        // .constant("API_URL", "http://jrnl.today:7212")
+        .constant("API_URL", "http://thoughtstore.figroll.it:7212")
         .config(["$stateProvider", "$urlRouterProvider", function($stateProvider, $urlRouterProvider) {
             $urlRouterProvider.otherwise("/");
             $stateProvider
@@ -171,11 +172,10 @@
 
 
         function transform(raw) {
+            var result = [];
             var grouped = {};
-            raw.map(asThought).sort(function(a, b) {
-                // Newest first
-                return b.writtenAt - a.writtenAt;
-            }).forEach(function(thought) {
+
+            raw.map(asThought).forEach(function(thought) {
                 if(!grouped[thought.group]) {
                     grouped[thought.group] = {
                         group: thought.group,
@@ -190,9 +190,16 @@
                 grouped[k].thoughts = grouped[k].thoughts.sort(function(a, b) {
                     return a.writtenAt - b.writtenAt;
                 });
+
+                result.push({
+                    "group": grouped[k].group,
+                    "thoughts": grouped[k].thoughts
+                });
             });
 
-            return grouped;
+            return result.sort(function(a, b) {
+                return b.group - a.group;
+            });
         }
 
         function doImport(thought) {
