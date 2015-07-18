@@ -4,8 +4,7 @@
         .factory("ThoughtService", ThoughtService)
         .controller("OuterCtrl", OuterCtrl)
         .controller("AddOuterCtrl", AddOuterCtrl)
-        // .constant("API_URL", "http://jrnl.today:7212")
-        .constant("API_URL", "http://thoughtstore.figroll.it:7212")
+        .constant("API_URL", "https://jrnl.today/api")
         .config(["$stateProvider", "$urlRouterProvider", function($stateProvider, $urlRouterProvider) {
             $urlRouterProvider.otherwise("/");
             $stateProvider
